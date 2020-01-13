@@ -14,6 +14,7 @@ import it.polito.dp2.BIB.ass3.Bookshelf;
 import it.polito.dp2.BIB.ass3.Client;
 import it.polito.dp2.BIB.ass3.ItemReader;
 import it.polito.dp2.BIB.ass3.ServiceException;
+import it.polito.dp2.BIB.sol3.service.jaxb.Items;
 
 public class ClientFactoryImpl implements Client {
 	javax.ws.rs.client.Client client;
@@ -52,7 +53,7 @@ public class ClientFactoryImpl implements Client {
 			 	  .request(MediaType.APPLICATION_JSON_TYPE)
 			 	  .get( Items.class);
 		
-		for (it.polito.dp2.BIB.sol3.client.Items.Item i : items.getItem()) {
+		for (Items.Item i : items.getItem()) {
 			itemSet.add(new ItemReaderImpl(i));
 		}
 		

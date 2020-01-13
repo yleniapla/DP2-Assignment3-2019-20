@@ -1,6 +1,7 @@
 package it.polito.dp2.BIB.sol3.service;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -11,14 +12,17 @@ import it.polito.dp2.BIB.sol3.db.BadRequestInOperationException;
 import it.polito.dp2.BIB.sol3.db.ConflictInOperationException;
 import it.polito.dp2.BIB.sol3.db.DB;
 import it.polito.dp2.BIB.sol3.db.ItemPage;
+import it.polito.dp2.BIB.sol3.db.MyBookshelfDB;
 import it.polito.dp2.BIB.sol3.db.Neo4jDB;
 import it.polito.dp2.BIB.sol3.service.jaxb.Citation;
 import it.polito.dp2.BIB.sol3.service.jaxb.Item;
 import it.polito.dp2.BIB.sol3.service.jaxb.Items;
+import it.polito.dp2.BIB.sol3.service.jaxb.MyBookshelfType;
 import it.polito.dp2.BIB.sol3.service.util.ResourseUtils;
 
 public class BiblioService {
 	private DB n4jDb = Neo4jDB.getNeo4jDB();
+	private MyBookshelfDB bsDB = new MyBookshelfDB();
 	ResourseUtils rutil;
 
 
@@ -132,4 +136,42 @@ public class BiblioService {
 		return items;
 	}
 
+	public MyBookshelfType createBookshelf (MyBookshelfType bs) throws Exception {
+		
+		int id = bsDB.createBookshelf(bs);
+		bs.setId(id);
+		return bs;
+		
+	}
+	
+	public List<MyBookshelfType> getBookshelves (String name) {
+
+		List<MyBookshelfType> bs = new ArrayList<MyBookshelfType>();
+		bs = bsDB.getBookshelf(name);
+		if (bs!=null)
+			return bs;
+		return null;
+	}
+	
+	public MyBookshelfType addItemToBookshelf (BigInteger item, int bs_id) throws Exception{
+		return bsDB.addItemToBookshelf(item, bs_id);
+	}
+
+	public boolean deleteBookshelf (MyBookshelfType bs) {
+		return bsDB.deleteBookshelf(bs);
+	}
+	
+	public int getBookshelfReads (int bs) {
+		return bsDB.getBookshelfReads(bs);
+	}
+	
+	public MyBookshelfType deleteItemFromBookshelf (int bs_id, BigInteger i) throws Exception {
+		return bsDB.deleteItemFromBookshelf(i, bs_id);
+	}
+	
+	public Item getItemFromBookshelf (int bs_id, BigInteger i) throws Exception {
+		return bsDB.getItemFromBookshelf(i, bs_id);
+	}
+			
+	
 }

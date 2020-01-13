@@ -18,7 +18,7 @@ public class ItemReaderImpl implements it.polito.dp2.BIB.ass3.ItemReader {
 	private Set<it.polito.dp2.BIB.ass3.ItemReader> citingItems;
 	
 	
-	public ItemReaderImpl(Item i) {
+	public ItemReaderImpl(it.polito.dp2.BIB.sol3.service.jaxb.Item i) {
 		this.title = i.getTitle();
 		if (i.getSubtitle() != null)
 			this.subtitle = i.getSubtitle();
