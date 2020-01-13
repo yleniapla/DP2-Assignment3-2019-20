@@ -16,11 +16,14 @@ public class MyBookshelfDB {
 	private DB n4jDb = Neo4jDB.getNeo4jDB();
 	
 	
-	public synchronized int createBookshelf(MyBookshelfType b) throws Exception {
+	public synchronized MyBookshelfType createBookshelf(String name) throws Exception {
 		bs_count++;
+		MyBookshelfType b = new MyBookshelfType();
+		b.setId(bs_count);
+		b.setName(name);
 		bs.put(bs_count, b);
 		reads.put(bs_count, 0);
-		return bs_count;
+		return b;
 	}
 	
 	public synchronized List<MyBookshelfType> getBookshelf(String name){
@@ -40,6 +43,7 @@ public class MyBookshelfDB {
 		if(bs.contains(b))
 		{
 			bs.remove(b).getId();
+			reads.remove(b.getId());
 			return true;
 		}
 		return false;

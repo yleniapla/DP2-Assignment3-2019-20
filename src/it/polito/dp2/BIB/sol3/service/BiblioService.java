@@ -136,15 +136,14 @@ public class BiblioService {
 		return items;
 	}
 
-	public MyBookshelfType createBookshelf (MyBookshelfType bs) throws Exception {
+	public MyBookshelfType createBookshelf(String name) throws Exception {
 		
-		int id = bsDB.createBookshelf(bs);
-		bs.setId(id);
+		MyBookshelfType bs = bsDB.createBookshelf(name);
 		return bs;
 		
 	}
 	
-	public List<MyBookshelfType> getBookshelves (String name) {
+	public List<MyBookshelfType> getBookshelves(String name) {
 
 		List<MyBookshelfType> bs = new ArrayList<MyBookshelfType>();
 		bs = bsDB.getBookshelf(name);
@@ -157,8 +156,11 @@ public class BiblioService {
 		return bsDB.addItemToBookshelf(item, bs_id);
 	}
 
-	public boolean deleteBookshelf (MyBookshelfType bs) {
-		return bsDB.deleteBookshelf(bs);
+	public boolean deleteBookshelf (String bs) {
+		
+		MyBookshelfType x = bsDB.getBookshelf(bs).get(0);
+		
+		return bsDB.deleteBookshelf(x);
 	}
 	
 	public int getBookshelfReads (int bs) {

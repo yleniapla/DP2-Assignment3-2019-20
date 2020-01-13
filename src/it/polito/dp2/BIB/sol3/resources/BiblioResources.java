@@ -9,6 +9,7 @@ import it.polito.dp2.BIB.sol3.service.SearchScope;
 
 import java.math.BigInteger;
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
@@ -344,6 +345,140 @@ public class BiblioResources {
 		if(!success)
 			throw new NotFoundException();
 		return;
+	}
+	
+	@GET
+	@Path("/shelves")
+    @ApiOperation(value = "getBookshelves", notes = "search shelves"
+	)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 404, message = "Not found"),
+    		})
+	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+	public List<MyBookshelfType> getShelves(
+			@ApiParam("The keyword to be used for the search") @QueryParam("keyword") @DefaultValue("") String keyword) {
+		try {
+			return service.getBookshelves(keyword);
+		} catch (Exception e) {
+			throw new InternalServerErrorException(e);
+		}
+	}
+	
+	@POST
+	@Path("/shelves")
+    @ApiOperation(value = "createBookshelf", notes = "create a new shelf", response=MyBookshelfType.class
+	)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 201, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 400, message = "Bad Request"),
+    		})
+	@Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+	public MyBookshelfType createShelf(String name) {
+		try {
+			return service.createBookshelf(name);
+		} catch (Exception e1) {
+			throw new InternalServerErrorException();
+		}
+	}
+	
+	@DELETE
+	@Path("/shelves")
+    @ApiOperation(value = "deleteBookshelf", notes = "delete a shelf"
+	)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 204, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 404, message = "Not Found"),
+    		})
+	public void deleteItemCitation(
+			@ApiParam("The name of theshelf") @PathParam("id") String name) {
+		boolean success;
+		try {
+			success=service.deleteBookshelf(name);
+		} catch (Exception e) {
+			throw new InternalServerErrorException();
+		}
+		if(!success)
+			throw new NotFoundException();
+		return;
+	}
+	
+	@PUT
+	@Path("/shelves/{shelfid}")
+    @ApiOperation(value = "AddItem", notes = "Add a single item to the bookshelf"
+	)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 400, message = "Bad Request"),
+    		@ApiResponse(code = 404, message = "Not Found"),
+    		})
+	@Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+	public MyBookshelfType addItem(
+			@ApiParam("The id of the shelf") @PathParam("shelfid") int id,
+			BigInteger item) {
+		try {
+			return service.addItemToBookshelf(item, id);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@GET
+	@Path("/shelves/{shelfid}/reads")
+    @ApiOperation(value = "getBookshelvesReads", notes = "shelves reads"
+	)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "OK", response=int.class),
+    		@ApiResponse(code = 404, message = "Not found"),
+    		})
+	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+	public int getShelvesReads(
+			@ApiParam("The id of the shelf") @QueryParam("shelfid") int id) {
+		try {
+			return service.getBookshelfReads(id);
+		} catch (Exception e) {
+			throw new InternalServerErrorException(e);
+		}
+	}
+	
+	@GET
+	@Path("/shelves/{shelfid}/{id}")
+    @ApiOperation(value = "getBookshelvesItem", notes = "shelves item"
+	)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "OK", response=Item.class),
+    		@ApiResponse(code = 404, message = "Not found"),
+    		})
+	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+	public Item getItemFromShelf(
+			@ApiParam("The id of the shelf") @QueryParam("shelfid") int bsid,
+			@ApiParam("The id of the item") @QueryParam("id") BigInteger id) {
+		try {
+			return service.getItemFromBookshelf(bsid, id);
+		} catch (Exception e) {
+			throw new InternalServerErrorException(e);
+		}
+	}
+	
+	@DELETE
+	@Path("/shelves/{shelfid}/{id}")
+    @ApiOperation(value = "deleteItemFromBookshelf", notes = "delete an item from shelf"
+	)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 204, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 404, message = "Not Found"),
+    		})
+	public MyBookshelfType deleteItemCitation(
+			@ApiParam("The id of the shelf") @QueryParam("shelfid") int bsid,
+			@ApiParam("The id of the item") @QueryParam("id") BigInteger id) {
+		try {
+			return service.deleteItemFromBookshelf(bsid, id);
+		} catch (Exception e) {
+			throw new InternalServerErrorException();
+		}
 	}
 	
 }
