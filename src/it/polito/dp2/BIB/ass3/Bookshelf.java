@@ -54,6 +54,7 @@ public interface Bookshelf {
 	 * Gives the total number of read operations performed on this bookshelf (this operation is done on the remote service)
 	 * @return the number of read operations
 	 * @throws DestroyedBookshelfException if the bookshelf represented by this interface does no longer exist
+	 * @throws ServiceException if the operation could not be completed because of a problem with the remote service
 	 */
-	public int getNumberOfReads() throws DestroyedBookshelfException;
+	public int getNumberOfReads() throws DestroyedBookshelfException, ServiceException;
 }

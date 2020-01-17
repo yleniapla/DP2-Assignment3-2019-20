@@ -1,28 +1,32 @@
 package it.polito.dp2.BIB.sol3.service;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.core.UriInfo;
 
+import it.polito.dp2.BIB.ass3.DestroyedBookshelfException;
+import it.polito.dp2.BIB.ass3.ServiceException;
+import it.polito.dp2.BIB.ass3.UnknownItemException;
 import it.polito.dp2.BIB.sol3.db.BadRequestInOperationException;
 import it.polito.dp2.BIB.sol3.db.ConflictInOperationException;
 import it.polito.dp2.BIB.sol3.db.DB;
 import it.polito.dp2.BIB.sol3.db.ItemPage;
-import it.polito.dp2.BIB.sol3.db.MyBookshelfDB;
 import it.polito.dp2.BIB.sol3.db.Neo4jDB;
 import it.polito.dp2.BIB.sol3.service.jaxb.Citation;
 import it.polito.dp2.BIB.sol3.service.jaxb.Item;
 import it.polito.dp2.BIB.sol3.service.jaxb.Items;
 import it.polito.dp2.BIB.sol3.service.jaxb.MyBookshelfType;
+import it.polito.dp2.BIB.sol3.service.jaxb.MyBookshelves;
 import it.polito.dp2.BIB.sol3.service.util.ResourseUtils;
 
 public class BiblioService {
 	private DB n4jDb = Neo4jDB.getNeo4jDB();
-	private MyBookshelfDB bsDB = new MyBookshelfDB();
+	private static Map<String, MyBookshelfType> bs = new HashMap<String, MyBookshelfType>();
 	ResourseUtils rutil;
 
 
@@ -30,7 +34,7 @@ public class BiblioService {
 		rutil = new ResourseUtils((uriInfo.getBaseUriBuilder()));
 	}
 	
-	public Items getItems(SearchScope scope, String keyword, int beforeInclusive, int afterInclusive, BigInteger page) throws Exception {
+	public synchronized Items getItems(SearchScope scope, String keyword, int beforeInclusive, int afterInclusive, BigInteger page) throws Exception {
 		ItemPage itemPage = n4jDb.getItems(scope,keyword,beforeInclusive,afterInclusive,page);
 
 		Items items = new Items();
@@ -47,14 +51,14 @@ public class BiblioService {
 		return items;
 	}
 
-	public Item getItem(BigInteger id) throws Exception {
+	public synchronized Item getItem(BigInteger id) throws Exception {
 			Item item = n4jDb.getItem(id);
 			if (item!=null)
 				rutil.completeItem(item, id);
 			return item;
 	}
 
-	public Item updateItem(BigInteger id, Item item) throws Exception {
+	public synchronized Item updateItem(BigInteger id, Item item) throws Exception {
 		Item ret = n4jDb.updateItem(id, item);
 		if (ret!=null) {
 			rutil.completeItem(item, id);
@@ -63,7 +67,7 @@ public class BiblioService {
 			return null;
 	}
 
-	public Item createItem(Item item) throws Exception {
+	public synchronized Item createItem(Item item) throws Exception {
 		BigInteger id = n4jDb.createItem(item);
 		if (id==null)
 			throw new Exception("Null id");
@@ -71,7 +75,7 @@ public class BiblioService {
 		return item;
 	}
 
-	public BigInteger deleteItem(BigInteger id) throws ConflictServiceException, Exception {
+	public synchronized BigInteger deleteItem(BigInteger id) throws ConflictServiceException, Exception {
 		try {
 			return n4jDb.deleteItem(id);
 		} catch (ConflictInOperationException e) {
@@ -79,7 +83,7 @@ public class BiblioService {
 		}
 	}
 
-	public Citation createItemCitation(BigInteger id, BigInteger tid, Citation citation) throws Exception {
+	public synchronized Citation createItemCitation(BigInteger id, BigInteger tid, Citation citation) throws Exception {
 		try {
 			return n4jDb.createItemCitation(id, tid, citation);
 		} catch (BadRequestInOperationException e) {
@@ -87,18 +91,18 @@ public class BiblioService {
 		}
 	}
 
-	public Citation getItemCitation(BigInteger id, BigInteger tid) throws Exception {
+	public synchronized Citation getItemCitation(BigInteger id, BigInteger tid) throws Exception {
 		Citation citation = n4jDb.getItemCitation(id,tid);
 		if (citation!=null)
 			rutil.completeCitation(citation, id, tid);
 		return citation;
 	}
 
-	public boolean deleteItemCitation(BigInteger id, BigInteger tid) throws Exception {
+	public synchronized boolean deleteItemCitation(BigInteger id, BigInteger tid) throws Exception {
 		return n4jDb.deleteItemCitation(id, tid);
 	}
 
-	public Items getItemCitations(BigInteger id) throws Exception {
+	public synchronized Items getItemCitations(BigInteger id) throws Exception {
 		ItemPage itemPage = n4jDb.getItemCitations(id, BigInteger.ONE);
 		if (itemPage==null)
 			return null;
@@ -117,7 +121,7 @@ public class BiblioService {
 		return items;
 	}
 
-	public Items getItemCitedBy(BigInteger id) throws Exception {
+	public synchronized Items getItemCitedBy(BigInteger id) throws Exception {
 		ItemPage itemPage = n4jDb.getItemCitedBy(id, BigInteger.ONE);
 		if (itemPage==null)
 			return null;
@@ -136,43 +140,83 @@ public class BiblioService {
 		return items;
 	}
 
-	public MyBookshelfType createBookshelf(String name) throws Exception {
+	public synchronized MyBookshelfType createBookshelf(String name) throws Exception {
 		
-		MyBookshelfType bs = bsDB.createBookshelf(name);
-		return bs;
+		MyBookshelfType b = new MyBookshelfType();
+		b.setName(name);
+		b.setReads(0);
+		bs.put(b.getName(), b);
+		return b;		
+	}
+		
+	public synchronized MyBookshelves getBookshelves(String name) throws ServiceException {
+		MyBookshelves list = new MyBookshelves();
+		
+		for(MyBookshelfType b : bs.values()){
+			if(b.getName().contains(name))
+				list.getShelf().add(b);
+		}
+		
+		if(!list.getShelf().isEmpty()){
+			return list;
+		}
+		else
+			throw new ServiceException();
+	}
+	
+	public synchronized void addItemToBookshelf (String item, String name) throws Exception{
+		
+		if(bs.get(name)!=null){
+			MyBookshelfType b = bs.get(name);
+			b.getShelfItem().add(item);
+		}
+		else
+			throw new DestroyedBookshelfException();
+	}
+		
+	public synchronized boolean deleteBookshelf (String name) throws DestroyedBookshelfException, ServiceException {
+		
+		if(bs.get(name)!=null){
+			bs.remove(name);
+			return true;
+		}
+		else
+			throw new DestroyedBookshelfException();
+	}
+	
+	public synchronized int getBookshelfReads (int bs_name) throws DestroyedBookshelfException, ServiceException {
+		
+		if(bs.get(bs_name)!=null){
+			MyBookshelfType x = bs.get(bs_name);
+			return x.getReads();
+		}
+		else
+			throw new DestroyedBookshelfException();
 		
 	}
 	
-	public List<MyBookshelfType> getBookshelves(String name) {
-
-		List<MyBookshelfType> bs = new ArrayList<MyBookshelfType>();
-		bs = bsDB.getBookshelf(name);
-		if (bs!=null)
-			return bs;
-		return null;
-	}
-	
-	public MyBookshelfType addItemToBookshelf (BigInteger item, int bs_id) throws Exception{
-		return bsDB.addItemToBookshelf(item, bs_id);
-	}
-
-	public boolean deleteBookshelf (String bs) {
+	public synchronized void deleteItemFromBookshelf (String bs_name, String item) throws Exception {
 		
-		MyBookshelfType x = bsDB.getBookshelf(bs).get(0);
+		if(bs.get(bs_name)!=null){
+			MyBookshelfType x = bs.get(bs_name);
+			
+			if(!x.getShelfItem().contains(item))
+				throw new UnknownItemException();
+			
+			x.getShelfItem().remove(item);
+		}
+		else
+			throw new DestroyedBookshelfException();
 		
-		return bsDB.deleteBookshelf(x);
 	}
 	
-	public int getBookshelfReads (int bs) {
-		return bsDB.getBookshelfReads(bs);
-	}
-	
-	public MyBookshelfType deleteItemFromBookshelf (int bs_id, BigInteger i) throws Exception {
-		return bsDB.deleteItemFromBookshelf(i, bs_id);
-	}
-	
-	public Item getItemFromBookshelf (int bs_id, BigInteger i) throws Exception {
-		return bsDB.getItemFromBookshelf(i, bs_id);
+	public synchronized List<String> getItemsFromBookshelf (String bs_name) throws Exception {
+		if(bs.get(bs_name)!=null){
+			MyBookshelfType x = bs.get(bs_name);
+			return x.getShelfItem();
+		}
+		else
+			throw new DestroyedBookshelfException();
 	}
 			
 	

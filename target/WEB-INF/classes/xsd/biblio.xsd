@@ -8,7 +8,7 @@
 				<xsd:element name="journals" type="xsd:anyURI"></xsd:element>
 				<xsd:element name="articles" type="xsd:anyURI"></xsd:element>
 				<xsd:element name="books" type="xsd:anyURI"></xsd:element>
-				<xsd:element name="shelves" type="MyBookshelfType"
+				<xsd:element name="shelves" type="MyBookshelves"
 					minOccurs="0"></xsd:element>
 				<xsd:element name="self" type="xsd:anyURI" minOccurs="0"></xsd:element>
 			</xsd:sequence>
@@ -47,12 +47,18 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:complexType name="MyBookshelves">
+		<xsd:sequence>
+			<xsd:element name="shelf" type="MyBookshelfType" maxOccurs="unbounded" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+
 	<xsd:complexType name="MyBookshelfType">
 		<xsd:sequence>
-			<xsd:element ref="item" maxOccurs="20" minOccurs="0" />
+			<xsd:element name="shelf_item" type="xsd:anyURI" maxOccurs="20" minOccurs="0" />
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string" use="required"/>
-		<xsd:attribute name="id" type="xsd:int" use="required"/>
+		<xsd:attribute name="reads" type="xsd:int" use="required"/>
 	</xsd:complexType>
 
 	<xsd:complexType name="ArticleType">

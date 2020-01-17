@@ -1,12 +1,10 @@
 package it.polito.dp2.BIB.sol3.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import it.polito.dp2.BIB.ass3.ItemReader;
 import it.polito.dp2.BIB.sol3.client.Items.Item;
 
 public class ItemReaderImpl implements it.polito.dp2.BIB.ass3.ItemReader {

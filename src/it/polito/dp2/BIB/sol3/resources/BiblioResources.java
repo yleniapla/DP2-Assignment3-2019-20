@@ -1,6 +1,8 @@
 package it.polito.dp2.BIB.sol3.resources;
 
 import it.polito.dp2.BIB.sol3.service.jaxb.*;
+import it.polito.dp2.BIB.ass3.DestroyedBookshelfException;
+import it.polito.dp2.BIB.ass3.ServiceException;
 import it.polito.dp2.BIB.sol3.model.EBiblio;
 import it.polito.dp2.BIB.sol3.service.BadRequestServiceException;
 import it.polito.dp2.BIB.sol3.service.BiblioService;
@@ -273,7 +275,7 @@ public class BiblioResources {
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 	public Citation getItemCitation(
 			@ApiParam("The id of the citing item of this citation") @PathParam("id") BigInteger id,
-			@ApiParam("The id of the cited item of this citation") @PathParam("tid") BigInteger tid) throws Exception {
+			@ApiParam("The id of the cited item of this citation") @PathParam("tid") BigInteger tid){
 		Citation citation;
 		try {
 			citation = service.getItemCitation(id,tid);
@@ -349,38 +351,42 @@ public class BiblioResources {
 	
 	@GET
 	@Path("/shelves")
-    @ApiOperation(value = "getBookshelves", notes = "search shelves"
-	)
+    @ApiOperation(value = "getBookshelves", notes = "search shelves")
     @ApiResponses(value = {
     		@ApiResponse(code = 200, message = "OK", response=MyBookshelfType.class),
     		@ApiResponse(code = 404, message = "Not found"),
     		})
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-	public List<MyBookshelfType> getShelves(
+	public MyBookshelves getShelves(
 			@ApiParam("The keyword to be used for the search") @QueryParam("keyword") @DefaultValue("") String keyword) {
-		try {
-			return service.getBookshelves(keyword);
-		} catch (Exception e) {
-			throw new InternalServerErrorException(e);
-		}
+			try {
+				return service.getBookshelves(keyword);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+
 	}
 	
 	@POST
 	@Path("/shelves")
-    @ApiOperation(value = "createBookshelf", notes = "create a new shelf", response=MyBookshelfType.class
-	)
+    @ApiOperation(value = "createBookshelf", notes = "create a new shelf", response = MyBookshelfType.class)
     @ApiResponses(value = {
-    		@ApiResponse(code = 201, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 201, message = "Created", response = MyBookshelfType.class),
     		@ApiResponse(code = 400, message = "Bad Request"),
     		})
-	@Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-	public MyBookshelfType createShelf(String name) {
-		try {
-			return service.createBookshelf(name);
-		} catch (Exception e1) {
-			throw new InternalServerErrorException();
-		}
+	public MyBookshelfType createShelf(@ApiParam("The name to be create the shelf") @QueryParam("name") String name){
+		
+			MyBookshelfType b;
+			try {
+				b = service.createBookshelf(name);
+				return b;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+
 	}
 	
 	@DELETE
@@ -388,20 +394,16 @@ public class BiblioResources {
     @ApiOperation(value = "deleteBookshelf", notes = "delete a shelf"
 	)
     @ApiResponses(value = {
-    		@ApiResponse(code = 204, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 204, message = "OK"),
     		@ApiResponse(code = 404, message = "Not Found"),
     		})
 	public void deleteItemCitation(
 			@ApiParam("The name of theshelf") @PathParam("id") String name) {
-		boolean success;
 		try {
-			success=service.deleteBookshelf(name);
-		} catch (Exception e) {
-			throw new InternalServerErrorException();
+			service.deleteBookshelf(name);
+		} catch (DestroyedBookshelfException | ServiceException e) {
+			e.printStackTrace();
 		}
-		if(!success)
-			throw new NotFoundException();
-		return;
 	}
 	
 	@PUT
@@ -409,21 +411,20 @@ public class BiblioResources {
     @ApiOperation(value = "AddItem", notes = "Add a single item to the bookshelf"
 	)
     @ApiResponses(value = {
-    		@ApiResponse(code = 200, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 201, message = "Created"),
     		@ApiResponse(code = 400, message = "Bad Request"),
     		@ApiResponse(code = 404, message = "Not Found"),
     		})
 	@Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-	public MyBookshelfType addItem(
-			@ApiParam("The id of the shelf") @PathParam("shelfid") int id,
-			BigInteger item) {
-		try {
-			return service.addItemToBookshelf(item, id);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+	public void addItem(
+			@ApiParam("The id of the shelf") @PathParam("shelfid") String id, 
+			@ApiParam("The id of the item") @PathParam("item") String item) {
+
+			try {
+				service.addItemToBookshelf(item, id);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 	}
 	
 	@GET
@@ -437,11 +438,13 @@ public class BiblioResources {
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 	public int getShelvesReads(
 			@ApiParam("The id of the shelf") @QueryParam("shelfid") int id) {
-		try {
-			return service.getBookshelfReads(id);
-		} catch (Exception e) {
-			throw new InternalServerErrorException(e);
-		}
+
+			try {
+				return service.getBookshelfReads(id);
+			} catch (DestroyedBookshelfException | ServiceException e) {
+				e.printStackTrace();
+			}
+			return -1;
 	}
 	
 	@GET
@@ -453,14 +456,16 @@ public class BiblioResources {
     		@ApiResponse(code = 404, message = "Not found"),
     		})
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-	public Item getItemFromShelf(
-			@ApiParam("The id of the shelf") @QueryParam("shelfid") int bsid,
-			@ApiParam("The id of the item") @QueryParam("id") BigInteger id) {
-		try {
-			return service.getItemFromBookshelf(bsid, id);
-		} catch (Exception e) {
-			throw new InternalServerErrorException(e);
-		}
+	public List<String> getItemFromShelf(
+			@ApiParam("The id of the shelf") @QueryParam("shelfid") String bsid){
+		
+			try {
+				return service.getItemsFromBookshelf(bsid);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		return null;
 	}
 	
 	@DELETE
@@ -468,17 +473,17 @@ public class BiblioResources {
     @ApiOperation(value = "deleteItemFromBookshelf", notes = "delete an item from shelf"
 	)
     @ApiResponses(value = {
-    		@ApiResponse(code = 204, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 204, message = "OK"),
     		@ApiResponse(code = 404, message = "Not Found"),
     		})
-	public MyBookshelfType deleteItemCitation(
-			@ApiParam("The id of the shelf") @QueryParam("shelfid") int bsid,
-			@ApiParam("The id of the item") @QueryParam("id") BigInteger id) {
-		try {
-			return service.deleteItemFromBookshelf(bsid, id);
-		} catch (Exception e) {
-			throw new InternalServerErrorException();
-		}
+	public void deleteItemFromShelf(
+			@ApiParam("The id of the shelf") @QueryParam("shelfid") String bsid, String id) {
+
+			try {
+				service.deleteItemFromBookshelf(bsid, id);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 	}
 	
 }

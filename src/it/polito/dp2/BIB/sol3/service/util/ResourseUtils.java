@@ -7,7 +7,6 @@ import javax.ws.rs.core.UriBuilder;
 
 import it.polito.dp2.BIB.sol3.service.jaxb.Citation;
 import it.polito.dp2.BIB.sol3.service.jaxb.Item;
-import it.polito.dp2.BIB.sol3.service.jaxb.MyBookshelfType;
 
 public class ResourseUtils {
 	UriBuilder base;
@@ -36,6 +35,5 @@ public class ResourseUtils {
 		citation.setTo(items.clone().path(tid.toString()).build().toString());
 		citation.setSelf(fromBuilder.clone().path("citations").path(tid.toString()).build().toString());
 	}
-
 
 }

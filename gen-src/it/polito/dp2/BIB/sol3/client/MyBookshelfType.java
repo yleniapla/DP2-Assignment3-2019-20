@@ -42,7 +42,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;/element>
  *       &lt;/sequence>
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}int" />
+ *       &lt;attribute name="reads" use="required" type="{http://www.w3.org/2001/XMLSchema}int" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -60,8 +60,8 @@ public class MyBookshelfType {
     protected List<MyBookshelfType.Item> item;
     @XmlAttribute(name = "name", required = true)
     protected String name;
-    @XmlAttribute(name = "id", required = true)
-    protected int id;
+    @XmlAttribute(name = "reads", required = true)
+    protected int reads;
 
     /**
      * Gets the value of the item property.
@@ -117,19 +117,19 @@ public class MyBookshelfType {
     }
 
     /**
-     * Gets the value of the id property.
+     * Gets the value of the reads property.
      * 
      */
-    public int getId() {
-        return id;
+    public int getReads() {
+        return reads;
     }
 
     /**
-     * Sets the value of the id property.
+     * Sets the value of the reads property.
      * 
      */
-    public void setId(int value) {
-        this.id = value;
+    public void setReads(int value) {
+        this.reads = value;
     }
 
 
