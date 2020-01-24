@@ -34,6 +34,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link MyBookshelfType }
+     * 
+     */
+    public MyBookshelfType createMyBookshelfType() {
+        return new MyBookshelfType();
+    }
+
+    /**
      * Create an instance of {@link Items }
      * 
      */
@@ -42,11 +50,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link MyBookshelfType }
+     * Create an instance of {@link MyBookshelfType.Item }
      * 
      */
-    public MyBookshelfType createMyBookshelfType() {
-        return new MyBookshelfType();
+    public MyBookshelfType.Item createMyBookshelfTypeItem() {
+        return new MyBookshelfType.Item();
     }
 
     /**
@@ -90,11 +98,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link MyBookshelfType.Item }
+     * Create an instance of {@link MyBookshelves }
      * 
      */
-    public MyBookshelfType.Item createMyBookshelfTypeItem() {
-        return new MyBookshelfType.Item();
+    public MyBookshelves createMyBookshelves() {
+        return new MyBookshelves();
     }
 
     /**

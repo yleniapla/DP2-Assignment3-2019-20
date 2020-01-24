@@ -9,11 +9,18 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import it.polito.dp2.BIB.sol3.model.MyBookshelf;
+import it.polito.dp2.BIB.sol3.service.jaxb.MyBookshelves;
+import it.polito.dp2.BIB.sol3.service.jaxb.*;
 import it.polito.dp2.BIB.ass3.Bookshelf;
 import it.polito.dp2.BIB.ass3.Client;
+import it.polito.dp2.BIB.ass3.DestroyedBookshelfException;
 import it.polito.dp2.BIB.ass3.ItemReader;
 import it.polito.dp2.BIB.ass3.ServiceException;
+import it.polito.dp2.BIB.ass3.TooManyItemsException;
+import it.polito.dp2.BIB.ass3.UnknownItemException;
 
 public class ClientFactoryImpl implements Client {
 	javax.ws.rs.client.Client client;
@@ -32,14 +39,40 @@ public class ClientFactoryImpl implements Client {
 
 	@Override
 	public Bookshelf createBookshelf(String name) throws ServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		Response reply = target.path("/shelves").queryParam("name", name).request(MediaType.APPLICATION_JSON).post(null);
+		reply.bufferEntity();
+		if (reply.getStatus() != 201)
+			throw new ServiceException();
+		else {
+			MyBookshelfType res = reply.readEntity(MyBookshelfType.class);
+			MyBookshelf bs = new MyBookshelf(res.getName());
+			return bs;
+		}
 	}
 
 	@Override
 	public Set<Bookshelf> getBookshelfs(String name) throws ServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		Set<Bookshelf> result = new HashSet<>();
+		Response reply = target.path("/shelves").queryParam("keyword", name).request(MediaType.APPLICATION_JSON).get();
+		reply.bufferEntity();
+		if (reply.getStatus() != 200)
+			throw new ServiceException();
+		else {
+			MyBookshelves bs = reply.readEntity(MyBookshelves.class);
+			for(it.polito.dp2.BIB.sol3.service.jaxb.MyBookshelfType b : bs.getMyBookshelfType()){
+				MyBookshelf temp = new MyBookshelf(b.getName());
+				for(it.polito.dp2.BIB.sol3.service.jaxb.Item i : b.getItem()){
+					ItemReaderImpl item = new ItemReaderImpl(i);
+					try {
+						temp.addItem(item);
+					} catch (DestroyedBookshelfException | UnknownItemException | TooManyItemsException e) {
+						e.printStackTrace();
+					}
+				};
+				result.add(temp);
+			};
+		}
+		return result;
 	}
 
 	@Override

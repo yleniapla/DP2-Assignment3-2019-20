@@ -55,7 +55,7 @@
 
 	<xsd:complexType name="MyBookshelfType">
 		<xsd:sequence>
-			<xsd:element name="shelf_item" type="xsd:anyURI" maxOccurs="20" minOccurs="0" />
+			<xsd:element ref="item" maxOccurs="20" minOccurs="0" />
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string" use="required"/>
 		<xsd:attribute name="reads" type="xsd:int" use="required"/>

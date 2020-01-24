@@ -18,6 +18,7 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
@@ -358,8 +359,11 @@ public class BiblioResources {
     		})
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 	public MyBookshelves getShelves(
-			@ApiParam("The keyword to be used for the search") @QueryParam("keyword") @DefaultValue("") String keyword) {
+			@ApiParam("The keyword to be used for the search") @QueryParam("keyword") String keyword) {
 			try {
+				if(keyword=="" || keyword.isEmpty() || keyword == null)
+					throw new BadRequestException();
+				
 				return service.getBookshelves(keyword);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -376,7 +380,10 @@ public class BiblioResources {
     		@ApiResponse(code = 400, message = "Bad Request"),
     		})
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-	public MyBookshelfType createShelf(@ApiParam("The name to be create the shelf") @QueryParam("name") String name){
+	public MyBookshelfType createShelf(@ApiParam("The name to create the shelf") @QueryParam("name") String name){
+		
+			if(name=="" || name.isEmpty() || name == null)
+			throw new BadRequestException();
 		
 			MyBookshelfType b;
 			try {
@@ -398,7 +405,11 @@ public class BiblioResources {
     		@ApiResponse(code = 404, message = "Not Found"),
     		})
 	public void deleteItemCitation(
-			@ApiParam("The name of theshelf") @PathParam("id") String name) {
+			@ApiParam("The name of the shelf") @QueryParam("name") String name) {
+		
+		if(name=="" || name.isEmpty() || name == null)
+			throw new BadRequestException();
+		
 		try {
 			service.deleteBookshelf(name);
 		} catch (DestroyedBookshelfException | ServiceException e) {
@@ -407,7 +418,7 @@ public class BiblioResources {
 	}
 	
 	@PUT
-	@Path("/shelves/{shelfid}")
+	@Path("/shelves/{shelfid}/items")
     @ApiOperation(value = "AddItem", notes = "Add a single item to the bookshelf"
 	)
     @ApiResponses(value = {
@@ -418,10 +429,20 @@ public class BiblioResources {
 	@Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 	public void addItem(
 			@ApiParam("The id of the shelf") @PathParam("shelfid") String id, 
-			@ApiParam("The id of the item") @PathParam("item") String item) {
+			@ApiParam("The item") @PathParam("id") Item item) {
 
+			if(id=="" || id.isEmpty() || id == null)
+				throw new BadRequestException();
+		
 			try {
-				service.addItemToBookshelf(item, id);
+				int x = service.addItemToBookshelf(item, id);
+				
+				if(x==-3)
+					throw new ForbiddenException();
+				if(x==-2)
+					throw new NotFoundException();
+				if(x==-1)
+					throw new BadRequestException();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -435,10 +456,13 @@ public class BiblioResources {
     		@ApiResponse(code = 200, message = "OK", response=int.class),
     		@ApiResponse(code = 404, message = "Not found"),
     		})
-	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+	@Produces({MediaType.TEXT_PLAIN})
 	public int getShelvesReads(
-			@ApiParam("The id of the shelf") @QueryParam("shelfid") int id) {
-
+			@ApiParam("The id of the shelf") @PathParam("shelfid") String id) {
+	
+			if(id.equals("") || id == null)
+				throw new BadRequestException();
+		
 			try {
 				return service.getBookshelfReads(id);
 			} catch (DestroyedBookshelfException | ServiceException e) {
@@ -448,7 +472,7 @@ public class BiblioResources {
 	}
 	
 	@GET
-	@Path("/shelves/{shelfid}/{id}")
+	@Path("/shelves/{shelfid}/items")
     @ApiOperation(value = "getBookshelvesItem", notes = "shelves item"
 	)
     @ApiResponses(value = {
@@ -456,11 +480,14 @@ public class BiblioResources {
     		@ApiResponse(code = 404, message = "Not found"),
     		})
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-	public List<String> getItemFromShelf(
-			@ApiParam("The id of the shelf") @QueryParam("shelfid") String bsid){
+	public List<Item> getItemFromShelf(
+			@ApiParam("The id of the shelf") @PathParam("shelfid") String id){
+		
+			if(id.equals("") || id == null)
+				throw new BadRequestException();
 		
 			try {
-				return service.getItemsFromBookshelf(bsid);
+				return service.getItemsFromBookshelf(id);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -469,7 +496,7 @@ public class BiblioResources {
 	}
 	
 	@DELETE
-	@Path("/shelves/{shelfid}/{id}")
+	@Path("/shelves/{shelfid}/items/{id}")
     @ApiOperation(value = "deleteItemFromBookshelf", notes = "delete an item from shelf"
 	)
     @ApiResponses(value = {
@@ -477,10 +504,13 @@ public class BiblioResources {
     		@ApiResponse(code = 404, message = "Not Found"),
     		})
 	public void deleteItemFromShelf(
-			@ApiParam("The id of the shelf") @QueryParam("shelfid") String bsid, String id) {
-
+			@ApiParam("The id of the shelf") @PathParam("shelfid") String id, @ApiParam("The id of the item") @PathParam("id") BigInteger id_i) {
+			
+			if(id=="" || id.isEmpty() || id == null)
+				throw new BadRequestException();
+		
 			try {
-				service.deleteItemFromBookshelf(bsid, id);
+				service.deleteItemFromBookshelf(id, id_i);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

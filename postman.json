@@ -1,0 +1,306 @@
+{
+	"info": {
+		"_postman_id": "125d6587-e68f-41a7-aaa2-c0fce203a4f2",
+		"name": "DP2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Biblio",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "All Items",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio/items",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Bookshelf",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio/bookshelf?name=PrimoScaffale",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio",
+						"bookshelf"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "PrimoScaffale"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Bookshelves",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio/bookshelf?keyword=s",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio",
+						"bookshelf"
+					],
+					"query": [
+						{
+							"key": "keyword",
+							"value": "s"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bookshelf",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio/bookshelf/0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio",
+						"bookshelf",
+						"0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Items inside Bookshelf",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio/bookshelf/0/items",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio",
+						"bookshelf",
+						"0",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Item to Bookshelf",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<item>\n    <self>http://localhost:8080/BiblioSystem/rest/biblio/items/0</self>\n    <author>Constance Heitmeyer</author>\n    <author>Jean-Pierre Talpin</author>\n    <title>Guest editorial</title>\n    <article journal=\"0925-9856\" volume=\"2008\" number=\"1\"/>\n    <citedBy>http://localhost:8080/BiblioSystem/rest/biblio/items/0/citedBy</citedBy>\n    <citations>http://localhost:8080/BiblioSystem/rest/biblio/items/0/citations</citations>\n    <targets>http://localhost:8080/BiblioSystem/rest/biblio/items/0/citations/targets</targets>\n</item>"
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio/bookshelf/0/items",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio",
+						"bookshelf",
+						"0",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Item from Bookshelf",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio/bookshelf/0/items/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio",
+						"bookshelf",
+						"0",
+						"items",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Bookshelf",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio/bookshelf/0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio",
+						"bookshelf",
+						"0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get read number of Bookshelf",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/BiblioSystem/rest/biblio/bookshelf/0/stats",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"BiblioSystem",
+						"rest",
+						"biblio",
+						"bookshelf",
+						"0",
+						"stats"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

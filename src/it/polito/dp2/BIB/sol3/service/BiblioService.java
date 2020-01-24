@@ -77,7 +77,15 @@ public class BiblioService {
 
 	public synchronized BigInteger deleteItem(BigInteger id) throws ConflictServiceException, Exception {
 		try {
-			return n4jDb.deleteItem(id);
+			BigInteger x = n4jDb.deleteItem(id);
+			if(x != null)
+			{
+				for(String name : BiblioService.bs.keySet())
+				this.deleteItemFromBookshelf(name, id);
+			} else
+				throw new ConflictServiceException();
+			
+			return x;
 		} catch (ConflictInOperationException e) {
 			throw new ConflictServiceException();
 		}
@@ -154,21 +162,29 @@ public class BiblioService {
 		
 		for(MyBookshelfType b : bs.values()){
 			if(b.getName().contains(name))
-				list.getShelf().add(b);
+				list.getMyBookshelfType().add(b);
 		}
-		
-		if(!list.getShelf().isEmpty()){
 			return list;
-		}
-		else
-			throw new ServiceException();
 	}
 	
-	public synchronized void addItemToBookshelf (String item, String name) throws Exception{
+	public synchronized int addItemToBookshelf (Item item, String name) throws Exception{
 		
 		if(bs.get(name)!=null){
 			MyBookshelfType b = bs.get(name);
-			b.getShelfItem().add(item);
+			
+			if(this.getItem(ResourseUtils.SelfToId(item.getSelf()))==null)
+				return -2;
+			
+			if(b.getItem().size()>=20)
+			{
+				return -3; //403
+				
+			} else if (b.getItem().contains(item)){
+				
+				return -1; //400
+			} 
+			b.getItem().add(item);
+			return 0;
 		}
 		else
 			throw new DestroyedBookshelfException();
@@ -184,10 +200,10 @@ public class BiblioService {
 			throw new DestroyedBookshelfException();
 	}
 	
-	public synchronized int getBookshelfReads (int bs_name) throws DestroyedBookshelfException, ServiceException {
+	public synchronized int getBookshelfReads (String id) throws DestroyedBookshelfException, ServiceException {
 		
-		if(bs.get(bs_name)!=null){
-			MyBookshelfType x = bs.get(bs_name);
+		if(bs.get(id)!=null){
+			MyBookshelfType x = bs.get(id);
 			return x.getReads();
 		}
 		else
@@ -195,25 +211,27 @@ public class BiblioService {
 		
 	}
 	
-	public synchronized void deleteItemFromBookshelf (String bs_name, String item) throws Exception {
+	public synchronized void deleteItemFromBookshelf (String bs_name, BigInteger item) throws Exception {
 		
 		if(bs.get(bs_name)!=null){
 			MyBookshelfType x = bs.get(bs_name);
 			
-			if(!x.getShelfItem().contains(item))
+			Item i = this.getItem(item);
+			
+			if(!x.getItem().contains(i))
 				throw new UnknownItemException();
 			
-			x.getShelfItem().remove(item);
+			x.getItem().remove(i);
 		}
 		else
 			throw new DestroyedBookshelfException();
 		
 	}
 	
-	public synchronized List<String> getItemsFromBookshelf (String bs_name) throws Exception {
+	public synchronized List<Item> getItemsFromBookshelf (String bs_name) throws Exception {
 		if(bs.get(bs_name)!=null){
 			MyBookshelfType x = bs.get(bs_name);
-			return x.getShelfItem();
+			return x.getItem();
 		}
 		else
 			throw new DestroyedBookshelfException();
