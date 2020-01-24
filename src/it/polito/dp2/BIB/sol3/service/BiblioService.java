@@ -77,15 +77,19 @@ public class BiblioService {
 
 	public synchronized BigInteger deleteItem(BigInteger id) throws ConflictServiceException, Exception {
 		try {
-			BigInteger x = n4jDb.deleteItem(id);
-			if(x != null)
+			Item i = n4jDb.getItem(id);
+			
+			if(i != null)
 			{
-				for(String name : BiblioService.bs.keySet())
-				this.deleteItemFromBookshelf(name, id);
+				for(MyBookshelfType mbs : BiblioService.bs.values()){
+					if(mbs.getItem().contains(i)){
+						this.deleteItemFromBookshelf(mbs.getName(), id);
+					}
+				}
+				return n4jDb.deleteItem(id);
 			} else
 				throw new ConflictServiceException();
 			
-			return x;
 		} catch (ConflictInOperationException e) {
 			throw new ConflictServiceException();
 		}
@@ -157,13 +161,16 @@ public class BiblioService {
 		return b;		
 	}
 		
-	public synchronized MyBookshelves getBookshelves(String name) throws ServiceException {
+	public synchronized MyBookshelves getBookshelves(String name) throws ServiceException, DestroyedBookshelfException {
 		MyBookshelves list = new MyBookshelves();
 		
 		for(MyBookshelfType b : bs.values()){
 			if(b.getName().contains(name))
 				list.getMyBookshelfType().add(b);
 		}
+			if(list.getMyBookshelfType().isEmpty())
+				throw new DestroyedBookshelfException();
+			
 			return list;
 	}
 	
@@ -172,17 +179,24 @@ public class BiblioService {
 		if(bs.get(name)!=null){
 			MyBookshelfType b = bs.get(name);
 			
-			if(this.getItem(ResourseUtils.SelfToId(item.getSelf()))==null)
+			if(this.getItem(ResourseUtils.SelfToId(item.getSelf()))==null){
+				System.err.println("Elemento non trovato errore -2");
 				return -2;
+			}
+				
 			
 			if(b.getItem().size()>=20)
 			{
+				System.err.println("Errore -3");
 				return -3; //403
 				
 			} else if (b.getItem().contains(item)){
 				
+				System.err.println("Errore -1");
 				return -1; //400
 			} 
+			
+			System.err.println("Elemento trovato e aggiunto");
 			b.getItem().add(item);
 			return 0;
 		}

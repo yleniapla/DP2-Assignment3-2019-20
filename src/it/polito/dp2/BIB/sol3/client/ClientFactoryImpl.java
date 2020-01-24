@@ -2,8 +2,11 @@ package it.polito.dp2.BIB.sol3.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -153,8 +156,80 @@ public class ClientFactoryImpl implements Client {
 			uri = customUri;
 		
 		try {
+			//CLIENT DAVIDE DA CAMBIARE
 			mainClient = new ClientFactoryImpl(new URI(uri));
-			printItems();
+			// printItems();
+			Bookshelf bookshelf1 = mainClient.createBookshelf("Primo scaffale");
+			Bookshelf bookshelf2 = mainClient.createBookshelf("Secondo scaffale");
+			Bookshelf bookshelf3 = mainClient.createBookshelf("Terzo scaffale");
+			Set<Bookshelf> allBookshelves = mainClient.getBookshelfs("scaffale");
+			Set<ItemReader> allItemsSet = mainClient.getItems("method", 1900, 2020);
+			System.out.println("I have " + allItemsSet.size() + " items inside the Set");
+			List<ItemReader> allItems = mainClient.getItems("method", 1900, 2020).stream().collect(Collectors.toList());
+			System.out.println("I have " + allItems.size() + " items");
+			List<ItemReader> itemsAdded = new ArrayList<>();
+			try {
+				System.out.println("bookshelf 1: " + bookshelf1.getName());
+				System.out.println("bookshelf 2: " + bookshelf2.getName());
+				System.out.println("bookshelf 3: " + bookshelf3.getName());
+				System.out.println("Here I have some bookshelves:");
+				for (Bookshelf b : allBookshelves) {
+					System.out.println(b.getName());
+				}
+				int counter = 0;
+				for (int i = 0; i < allItems.size(); i++) {
+					// if (counter < 61) {
+					if (counter < 60) {
+						if (i % 3 == 1) {
+							bookshelf1.addItem(allItems.get(i));
+							itemsAdded.add(allItems.get(i));
+							counter++;
+						} else if (i % 3 == 2) {
+							bookshelf2.addItem(allItems.get(i));
+							itemsAdded.add(allItems.get(i));
+							counter++;
+						} else if (i % 3 == 0) {
+							bookshelf3.addItem(allItems.get(i));
+							itemsAdded.add(allItems.get(i));
+							counter++;
+						}
+					} else
+						break;
+				}
+				System.out.println("There are " + bookshelf1.getItems().size() + " items inside bookshelf1");
+				System.out.println("There are " + bookshelf2.getItems().size() + " items inside bookshelf2");
+				System.out.println("There are " + bookshelf3.getItems().size() + " items inside bookshelf3");
+				bookshelf1.getItems();
+				bookshelf2.getItems();
+				bookshelf1.getItems();
+				System.out.println("Reads 1: " + bookshelf1.getNumberOfReads());
+				System.out.println("Reads 2: " + bookshelf2.getNumberOfReads());
+				System.out.println("Reads 3: " + bookshelf3.getNumberOfReads());
+				// bookshelf1.removeItem(null);
+				for (int i = 0; i < itemsAdded.size(); i++) {
+					if (i % 3 == 1) {
+						bookshelf1.removeItem(itemsAdded.get(i));
+					} else if (i % 3 == 2) {
+						bookshelf2.removeItem(itemsAdded.get(i));
+					} else if (i % 3 == 0) {
+						bookshelf3.removeItem(itemsAdded.get(i));
+					}
+				}
+				bookshelf1.getItems();
+				bookshelf2.getItems();
+				bookshelf3.getItems();
+				System.out.println("Reads 1: " + bookshelf1.getNumberOfReads());
+				System.out.println("Reads 2: " + bookshelf2.getNumberOfReads());
+				System.out.println("Reads 3: " + bookshelf3.getNumberOfReads());
+				bookshelf1.destroyBookshelf();
+				bookshelf2.destroyBookshelf();
+				bookshelf3.destroyBookshelf();
+				System.out.println("No more bookshelves:");
+				// bookshelf1.getItems();
+				// bookshelf1.destroyBookshelf();
+			} catch (DestroyedBookshelfException | UnknownItemException | TooManyItemsException e) {
+				e.printStackTrace();
+			}
 		} catch (URISyntaxException | ServiceException e) {
 			e.printStackTrace();
 		}

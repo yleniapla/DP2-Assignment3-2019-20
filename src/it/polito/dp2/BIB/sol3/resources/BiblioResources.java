@@ -355,6 +355,7 @@ public class BiblioResources {
     @ApiOperation(value = "getBookshelves", notes = "search shelves")
     @ApiResponses(value = {
     		@ApiResponse(code = 200, message = "OK", response=MyBookshelfType.class),
+    		@ApiResponse(code = 400, message = "Bad request"),
     		@ApiResponse(code = 404, message = "Not found"),
     		})
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
@@ -364,7 +365,11 @@ public class BiblioResources {
 				if(keyword=="" || keyword.isEmpty() || keyword == null)
 					throw new BadRequestException();
 				
-				return service.getBookshelves(keyword);
+				MyBookshelves x = service.getBookshelves(keyword);
+				if (x == null)
+					throw new BadRequestException();
+				
+				return x;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -431,8 +436,10 @@ public class BiblioResources {
 			@ApiParam("The id of the shelf") @PathParam("shelfid") String id, 
 			@ApiParam("The item") @PathParam("id") Item item) {
 
-			if(id=="" || id.isEmpty() || id == null)
+			if(id=="" || id.isEmpty() || id == null){
+				System.err.println("Errore in resources");
 				throw new BadRequestException();
+			}
 		
 			try {
 				int x = service.addItemToBookshelf(item, id);
