@@ -28,18 +28,6 @@ public class ItemReaderImpl implements it.polito.dp2.BIB.ass3.ItemReader {
 		}
 		citingItems = new HashSet<>();
 	}
-	
-	/*public ItemReaderImpl(it.polito.dp2.BIB.sol3.client.Items.Item i) {
-		this.title = i.getTitle();
-		if (i.getSubtitle() != null)
-			this.subtitle = i.getSubtitle();
-		this.authors = new ArrayList<>();
-		if (i.getAuthor() != null) {
-			if (! i.getAuthor().isEmpty())
-				this.authors.addAll(i.getAuthor());
-		}
-		citingItems = new HashSet<>();
-	}*/
 
 	public Integer getId()  {
 		return id;

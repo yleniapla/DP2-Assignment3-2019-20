@@ -33,12 +33,6 @@ public class MyBookshelf implements Bookshelf{
 	private int reads=0;
 	private Set<ItemReader> items;
 	
-	/*public MyBookshelf() {
-		this.name = "";
-		this.items = new HashSet<ItemReader>();
-		this.reads = 0;
-	}*/
-	
 	public MyBookshelf(String name) {
 		this.name = name;
 		this.items = new HashSet<ItemReader>();
@@ -104,11 +98,9 @@ public class MyBookshelf implements Bookshelf{
 		reply.bufferEntity();
 		if (reply.getStatus() == 200 | reply.getStatus() == 201 | reply.getStatus() == 204 ) {
 			this.items.add(item);
-			// System.out.println("Aggiunta Item Reader");
 		} else if (reply.getStatus() == 404)
 			throw new DestroyedBookshelfException();
 		else {
-			// System.out.println("Il sistema mi ha restituito " + reply.getStatus());
 			throw new ServiceException();
 		}
 		
@@ -175,8 +167,6 @@ public class MyBookshelf implements Bookshelf{
 		}
 		
 		Items results = reply.readEntity(Items.class);
-		
-		// results.getItem().forEach(i -> System.out.println("Dentro shelves/" + this.name + "/items ho " + i.getTitle()));
 		
 		List<ItemReader> removed = new ArrayList<ItemReader>();
 		List<ItemReader> added = new ArrayList<ItemReader>();

@@ -1,0 +1,27 @@
+#######################################
+#									  #
+#			DOCUMENTATION			  #
+#		   Ylenia Placanica			  #
+#			   S243838				  #
+#									  #
+#######################################
+
+
+Some assumptions I made:
+- Bookshelves are uniquely identified by their name
+- Two items are the same if they have the same title and subtitle (if present)
+- The same bookshelf can't contain more copies of the same item
+- When searching for a bookshelf there is a match with all the bookshelves containing the keyword in their name
+- Items can also be added/removed from outside the client, so I always refresh the data by comparing them with the one on Neo4j
+- If a bookshelf with the same name of an existing one is added, the latter overwrite the oldest
+- I omitted paging in my solution because it was not relevant
+
+I provide concurrency by using a ConcurrentHashMap to store data about bookshelves locally and by using synchronized methods.
+
+I have used idempotent methods (get, put) on the server, while I have used a non idempotent method (post) locally, where idempotence
+is give by the ConcurrentHashMap that doesn't accept clones of the same bookshelf.
+
+(I could have use HATEOAS principle also with bookshelf by giving them a fictitious URI locally, but I was not sure it was necessary).
+
+I validate input and handled all the possible exceptions, as required by OWASP guidelines.
+
