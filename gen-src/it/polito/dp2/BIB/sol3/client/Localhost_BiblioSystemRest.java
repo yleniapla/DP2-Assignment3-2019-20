@@ -18,7 +18,7 @@ import com.sun.jersey.api.uri.UriTemplate;
 
 @Generated(value = {
     "wadl|http://localhost:8080/BiblioSystem/rest/application.wadl"
-}, comments = "wadl2java, http://wadl.java.net", date = "2020-01-25T23:59:44.966+01:00")
+}, comments = "wadl2java, http://wadl.java.net", date = "2020-01-26T00:52:42.905+01:00")
 public class Localhost_BiblioSystemRest {
 
     /**
@@ -252,12 +252,12 @@ public class Localhost_BiblioSystemRest {
             return new Localhost_BiblioSystemRest.Biblio.Shelves(_client, _uriBuilder.buildFromMap(_templateAndMatrixParameterValues));
         }
 
-        public Localhost_BiblioSystemRest.Biblio.ShelvesShelfidReads shelvesShelfidReads(String shelfid) {
-            return new Localhost_BiblioSystemRest.Biblio.ShelvesShelfidReads(_client, _uriBuilder.buildFromMap(_templateAndMatrixParameterValues), shelfid);
-        }
-
         public Localhost_BiblioSystemRest.Biblio.ShelvesShelfidItems shelvesShelfidItems(String shelfid) {
             return new Localhost_BiblioSystemRest.Biblio.ShelvesShelfidItems(_client, _uriBuilder.buildFromMap(_templateAndMatrixParameterValues), shelfid);
+        }
+
+        public Localhost_BiblioSystemRest.Biblio.ShelvesShelfidReads shelvesShelfidReads(String shelfid) {
+            return new Localhost_BiblioSystemRest.Biblio.ShelvesShelfidReads(_client, _uriBuilder.buildFromMap(_templateAndMatrixParameterValues), shelfid);
         }
 
         public Localhost_BiblioSystemRest.Biblio.ShelvesShelfidItemsId shelvesShelfidItemsId(String shelfid, String id) {

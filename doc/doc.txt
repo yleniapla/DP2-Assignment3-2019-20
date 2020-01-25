@@ -25,3 +25,4 @@ is give by the ConcurrentHashMap that doesn't accept clones of the same bookshel
 
 I validate input and handled all the possible exceptions, as required by OWASP guidelines.
 
+I use singleton for data stored in main memory.

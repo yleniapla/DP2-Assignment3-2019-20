@@ -1,10 +1,7 @@
 package it.polito.dp2.BIB.sol3.service;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -14,6 +11,7 @@ import it.polito.dp2.BIB.sol3.db.BadRequestInOperationException;
 import it.polito.dp2.BIB.sol3.db.ConflictInOperationException;
 import it.polito.dp2.BIB.sol3.db.DB;
 import it.polito.dp2.BIB.sol3.db.ItemPage;
+import it.polito.dp2.BIB.sol3.db.MyLocalDB;
 import it.polito.dp2.BIB.sol3.db.Neo4jDB;
 import it.polito.dp2.BIB.sol3.service.jaxb.Citation;
 import it.polito.dp2.BIB.sol3.service.jaxb.Item;
@@ -24,7 +22,7 @@ import it.polito.dp2.BIB.sol3.service.util.ResourseUtils;
 
 public class BiblioService {
 	private DB n4jDb = Neo4jDB.getNeo4jDB();
-	private static Map<String, MyBookshelfType> bs = new HashMap<String, MyBookshelfType>();
+	private MyLocalDB myDB = MyLocalDB.getMyLocalDB();
 	ResourseUtils rutil;
 
 
@@ -79,11 +77,7 @@ public class BiblioService {
 			
 			if(i != null)
 			{
-				for(MyBookshelfType mbs : BiblioService.bs.values()){
-					if(mbs.getItem().contains(i)){
-						this.deleteItemFromBookshelf(mbs.getName(), id);
-					}
-				}
+				this.myDB.deleteItemFromAllBookshelf(i);
 				return n4jDb.deleteItem(id);
 			} else
 				throw new ConflictServiceException();
@@ -151,152 +145,39 @@ public class BiblioService {
 	}
 
 	public synchronized MyBookshelfType createBookshelf(String name) {
-		
-		MyBookshelfType b = new MyBookshelfType();
-		b.setName(name);
-		b.setReads(0);
-		bs.put(b.getName(), b);
-		return b;		
+		return this.myDB.newBookshelf(name);		
 	}
 		
 	public synchronized MyBookshelves getBookshelves(String name) {
-		MyBookshelves list = new MyBookshelves();
-
-		for(MyBookshelfType b : bs.values()){
-			if(b.getName().contains(name)){
-				list.getMyBookshelfType().add(b);
-				int r = b.getReads();
-				b.setReads(r+1);
-			}
-		}
-			return list;
+		return this.myDB.searchBookshelves(name);
 	}
 	
 	public synchronized int addItemToBookshelf (Item item, String name) throws Exception{
-		
-		if(bs.get(name)!=null){
-			MyBookshelfType b = bs.get(name);
-			
-			if(this.getItem(ResourseUtils.SelfToId(item.getSelf()))==null){ //check if the item exists int the biblio
-				return -2;
-			}
-			
-			for(Item it : b.getItem()){
-					if(item.getTitle()!=null && item.getSubtitle()!=null){
-						if(item.getTitle().equals(it.getTitle()) && item.getSubtitle().equals(it.getSubtitle())){
-							return 0; //item already present
-						}
-					} else {
-						if(item.getTitle().equals(it.getTitle())){
-							return 0; //item already present
-						}
-					}
-			}
-			
-			if(b.getItem().size()>=20){
-				return -3; 	//to many items in the shelf
-			} 
-			
-			b.getItem().add(item);
-			return 0;
+
+		if(this.getItem(ResourseUtils.SelfToId(item.getSelf()))==null){ //check if the item exists int the biblio
+			return -2;
 		}
-		else
-			return -1;
+
+		return this.myDB.addItemToBookshelf(item, name);
 	}
 		
-	public synchronized boolean deleteBookshelf (String name){
-		
-		if(bs.get(name)!=null){
-			bs.remove(name);
-			return true;
-		}
-		else
-			return false;
+	public synchronized boolean deleteBookshelf (String name){	
+		return this.myDB.removeBookshelf(name);
 	}
 	
-	public synchronized int getBookshelfReads (String id){
-		
-		if(bs.get(id)!=null){
-			MyBookshelfType x = bs.get(id);
-			return x.getReads();
-		}
-		else
-			return -1;
-		
+	public synchronized int getBookshelfReads (String name){
+		return this.myDB.getBookshelfReads(name);		
 	}
 	
-	public synchronized boolean deleteItemFromBookshelf (String bs_name, BigInteger item) throws Exception{
-		
-		if(bs.get(bs_name)!=null){
-			MyBookshelfType x = bs.get(bs_name);
-			
-			Item i = this.getItem(item);
-			List<Item> removed = new ArrayList<Item>();
-			
-			for(Item it : x.getItem())
-			{
-				if(i.getTitle()!=null && i.getSubtitle()!=null){
-					if(i.getTitle().equals(it.getTitle()) && i.getSubtitle().equals(it.getSubtitle())){
-						removed.add(it);
-						break;
-					}
-				} else {
-					if(i.getTitle().equals(it.getTitle())){
-						removed.add(it);
-						break;
-					}
-				}
-			}
-			
-			return x.getItem().removeAll(removed);
-			
-		}
-		else
-			return false;
-		
+	public synchronized boolean deleteItemFromBookshelf (String name, BigInteger item) throws Exception{	
+		Item i = this.getItem(item);
+		return this.myDB.deleteItemFromBookshelf(name, i);
 	}
 	
-	public synchronized Items getItemsFromBookshelf (String bs_name) throws Exception {
-		if(bs.get(bs_name)!=null) {
-			MyBookshelfType x = bs.get(bs_name);
-			
-			int r = x.getReads();
-			x.setReads(r+1);
-			
-			Items items = this.getItems(SearchScope.ALL, "", 10000, 0, BigInteger.ONE);
-			List<Item> removed = new ArrayList<Item>();
-			
-			for(Item i : x.getItem()){
-				
-				int flag = 0;
-				
-				for(Item it : items.getItem()){
-					
-					if(i.getTitle()!=null && i.getSubtitle()!=null){
-						if(i.getTitle().equals(it.getTitle()) && i.getSubtitle().equals(it.getSubtitle())){
-							flag =1;
-						}
-					} else {
-						if(i.getTitle().equals(it.getTitle())){
-							flag =1;
-						}
-					}
-					
-				}
-				
-				if(flag != 1){
-					removed.add(i);
-				}
-			}
-			
-			x.getItem().removeAll(removed);
-			Items result = new Items();
-			result.getItem().addAll(x.getItem());
-			
-			return result;
-		}
-		else
-			throw new Exception();
+	public synchronized Items getItemsFromBookshelf (String name) throws Exception {
+		
+		Items items = this.getItems(SearchScope.ALL, "", 10000, 0, BigInteger.ONE);
+		return this.myDB.getItemsFromBookshelf(name, items);
 	}
 			
 	
