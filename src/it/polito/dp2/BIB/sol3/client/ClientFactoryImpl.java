@@ -3,6 +3,7 @@ package it.polito.dp2.BIB.sol3.client;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +46,7 @@ public class ClientFactoryImpl implements Client {
 		Response reply = target.path("/shelves").queryParam("name", name).request(MediaType.APPLICATION_JSON).post(null);
 		reply.bufferEntity();
 		
-		System.out.println("CODICE ERRORE CREATE: " + reply.getStatus());
+		// System.out.println("CODICE ERRORE CREATE: " + reply.getStatus());
 		
 		if (reply.getStatus() != 200)
 			throw new ServiceException();
@@ -61,10 +62,23 @@ public class ClientFactoryImpl implements Client {
 		Set<Bookshelf> result = new HashSet<>();
 		Response reply = target.path("/shelves").queryParam("keyword", name).request(MediaType.APPLICATION_JSON).get();
 		reply.bufferEntity();
+		
+		System.out.println("La ricerca delle bookshelf da  " + reply.getStatus());
+		
 		if (reply.getStatus() != 200)
 			throw new ServiceException();
 		else {
+			
+			if(reply.getStatus() == 404){
+				return Collections.emptySet();
+			}
+			
 			MyBookshelves bs = reply.readEntity(MyBookshelves.class);
+			
+			if(bs.getMyBookshelfType().isEmpty())
+				return Collections.emptySet();
+			
+			System.out.println("Mi ha restituito " + bs.getMyBookshelfType().size() + " BookshelfType oggetti");
 			for(it.polito.dp2.BIB.sol3.service.jaxb.MyBookshelfType b : bs.getMyBookshelfType()){
 				MyBookshelf temp = new MyBookshelf(b.getName());
 				for(it.polito.dp2.BIB.sol3.service.jaxb.Item i : b.getItem()){

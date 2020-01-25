@@ -406,7 +406,7 @@ public class BiblioResources {
     @ApiOperation(value = "deleteBookshelf", notes = "delete a shelf"
 	)
     @ApiResponses(value = {
-    		@ApiResponse(code = 204, message = "OK"),
+    		@ApiResponse(code = 204, message = "No content"),
     		@ApiResponse(code = 404, message = "Not Found"),
     		})
 	public void deleteItemCitation(
@@ -431,28 +431,28 @@ public class BiblioResources {
     		@ApiResponse(code = 400, message = "Bad Request"),
     		@ApiResponse(code = 404, message = "Not Found"),
     		})
-	@Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_XML})
 	public void addItem(
 			@ApiParam("The id of the shelf") @PathParam("shelfid") String id, 
 			Item item) {
 
 			if(id=="" || id.isEmpty() || id == null){
-				System.err.println("Errore in resources");
+				// System.err.println("Errore in resources");
 				throw new BadRequestException();
 			}
-		
+			int x = -1;
 			try {
-				int x = service.addItemToBookshelf(item, id);
-				
-				if(x==-3)
-					throw new ForbiddenException();
-				if(x==-2)
-					throw new NotFoundException();
-				if(x==-1)
-					throw new BadRequestException();
+				x = service.addItemToBookshelf(item, id);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			if(x==-3)
+				throw new ForbiddenException();
+			if(x==-2)
+				throw new NotFoundException();
+			if(x==-1)
+				throw new BadRequestException();
 	}
 	
 	@GET
@@ -483,11 +483,11 @@ public class BiblioResources {
     @ApiOperation(value = "getBookshelvesItem", notes = "shelves item"
 	)
     @ApiResponses(value = {
-    		@ApiResponse(code = 200, message = "OK", response=Item.class),
+    		@ApiResponse(code = 200, message = "OK", response=Items.class),
     		@ApiResponse(code = 404, message = "Not found"),
     		})
 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-	public List<Item> getItemFromShelf(
+	public Items getItemFromShelf(
 			@ApiParam("The id of the shelf") @PathParam("shelfid") String id){
 		
 			if(id.equals("") || id == null)

@@ -1,6 +1,7 @@
 package it.polito.dp2.BIB.sol3.service;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -161,16 +162,16 @@ public class BiblioService {
 		return b;		
 	}
 		
-	public synchronized MyBookshelves getBookshelves(String name) throws ServiceException, DestroyedBookshelfException {
+	public synchronized MyBookshelves getBookshelves(String name) throws ServiceException {
 		MyBookshelves list = new MyBookshelves();
-		
+		System.out.println("Il numero totale di bookshelves è " + this.bs.values().size());
 		for(MyBookshelfType b : bs.values()){
-			if(b.getName().contains(name))
+			if(b.getName().contains(name)){
 				list.getMyBookshelfType().add(b);
+				int r = b.getReads();
+				b.setReads(r+1);
+			}
 		}
-			if(list.getMyBookshelfType().isEmpty())
-				throw new DestroyedBookshelfException();
-			
 			return list;
 	}
 	
@@ -180,24 +181,26 @@ public class BiblioService {
 			MyBookshelfType b = bs.get(name);
 			
 			if(this.getItem(ResourseUtils.SelfToId(item.getSelf()))==null){
-				System.err.println("Elemento non trovato errore -2");
+				// System.err.println("Elemento non trovato errore -2");
 				return -2;
 			}
 				
 			
 			if(b.getItem().size()>=20)
 			{
-				System.err.println("Errore -3");
+				// System.err.println("Errore -3");
 				return -3; //403
 				
 			} else if (b.getItem().contains(item)){
 				
-				System.err.println("Errore -1");
-				return -1; //400
+				// System.err.println("Errore -1");
+				return 0; //400
 			} 
 			
-			System.err.println("Elemento trovato e aggiunto");
+			// System.err.println("Elemento trovato e aggiunto");
 			b.getItem().add(item);
+			System.out.println("Il Bookshelf " + b.getName() + " ha " + b.getItem().size() + " elementi");
+			// b.getItem().forEach(i -> System.out.println("Ho dentro " + i.getTitle()));
 			return 0;
 		}
 		else
@@ -231,22 +234,25 @@ public class BiblioService {
 			MyBookshelfType x = bs.get(bs_name);
 			
 			Item i = this.getItem(item);
+			List<Item> removed = new ArrayList<Item>();
 			int flag = 0;
 			
 			for(Item it : x.getItem())
 			{
 				if(i.getTitle()!=null && i.getSubtitle()!=null){
 					if(i.getTitle().equals(it.getTitle()) && i.getSubtitle().equals(it.getSubtitle())){
-						x.getItem().remove(it);
+						removed.add(it);
 						flag =1;
 					}
 				} else {
 					if(i.getTitle().equals(it.getTitle())){
-						x.getItem().remove(it);
+						removed.add(it);
 						flag =1;
 					}
 				}
 			}
+			
+			x.getItem().removeAll(removed);
 			
 			if(flag == 0)
 				throw new UnknownItemException();
@@ -257,10 +263,81 @@ public class BiblioService {
 		
 	}
 	
-	public synchronized List<Item> getItemsFromBookshelf (String bs_name) throws Exception {
-		if(bs.get(bs_name)!=null){
+	public synchronized Items getItemsFromBookshelf (String bs_name) throws Exception {
+		if(bs.get(bs_name)!=null) {
 			MyBookshelfType x = bs.get(bs_name);
-			return x.getItem();
+			
+			int r = x.getReads();
+			x.setReads(r+1);
+			
+			Items items = this.getItems(SearchScope.ALL, "", 10000, 0, BigInteger.ONE);
+			System.out.println("Ho trovato " + items.getItem().size() + " Items");
+			
+			List<Item> removed = new ArrayList<Item>();
+			// List<Item> added = new ArrayList<Item>();
+			
+			for(Item i : x.getItem()){
+				
+				int flag = 0;
+				
+				for(Item it : items.getItem()){
+					
+					//System.out.println("Titolo elemento bookshelf: " + i.getTitle());
+					//System.out.println("Titolo elemento server: " + it.getTitle());
+					
+					if(i.getTitle()!=null && i.getSubtitle()!=null){
+						if(i.getTitle().equals(it.getTitle()) && i.getSubtitle().equals(it.getSubtitle())){
+							
+							//System.out.println("Titolo elemento bookshelf: " + i.getTitle());
+							//System.out.println("Titolo elemento server: " + it.getTitle());
+							
+							flag =1;
+						}
+					} else {
+						if(i.getTitle().equals(it.getTitle())){
+							//System.out.println("Titolo elemento bookshelf: " + i.getTitle());
+							//System.out.println("Titolo elemento server: " + it.getTitle());
+							flag =1;
+						}
+					}
+					
+				}
+				
+				if(flag != 1){
+					removed.add(i);
+				}
+			}
+			
+			x.getItem().removeAll(removed);
+			
+			/*for(Item i : items.getItem()){
+					int flag = 0;
+				
+				for(Item it : x.getItem()){
+					
+					if(i.getTitle()!=null && i.getSubtitle()!=null){
+						if(i.getTitle().equals(it.getTitle()) && i.getSubtitle().equals(it.getSubtitle())){
+							flag =1;
+						}
+					} else {
+						if(i.getTitle().equals(it.getTitle())){
+							flag =1;
+						}
+					}
+					
+				}
+				
+				if(flag != 1){
+					added.add(i);
+				}
+			}
+			
+			x.getItem().addAll(added);*/
+			
+			Items result = new Items();
+			result.getItem().addAll(x.getItem());
+			
+			return result;
 		}
 		else
 			throw new DestroyedBookshelfException();
