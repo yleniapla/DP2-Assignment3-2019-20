@@ -434,7 +434,7 @@ public class BiblioResources {
 	@Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 	public void addItem(
 			@ApiParam("The id of the shelf") @PathParam("shelfid") String id, 
-			@ApiParam("The item") @PathParam("id") Item item) {
+			Item item) {
 
 			if(id=="" || id.isEmpty() || id == null){
 				System.err.println("Errore in resources");

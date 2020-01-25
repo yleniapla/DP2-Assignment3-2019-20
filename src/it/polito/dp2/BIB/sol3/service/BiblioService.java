@@ -231,11 +231,26 @@ public class BiblioService {
 			MyBookshelfType x = bs.get(bs_name);
 			
 			Item i = this.getItem(item);
+			int flag = 0;
 			
-			if(!x.getItem().contains(i))
+			for(Item it : x.getItem())
+			{
+				if(i.getTitle()!=null && i.getSubtitle()!=null){
+					if(i.getTitle().equals(it.getTitle()) && i.getSubtitle().equals(it.getSubtitle())){
+						x.getItem().remove(it);
+						flag =1;
+					}
+				} else {
+					if(i.getTitle().equals(it.getTitle())){
+						x.getItem().remove(it);
+						flag =1;
+					}
+				}
+			}
+			
+			if(flag == 0)
 				throw new UnknownItemException();
-			
-			x.getItem().remove(i);
+
 		}
 		else
 			throw new DestroyedBookshelfException();

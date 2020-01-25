@@ -44,7 +44,10 @@ public class ClientFactoryImpl implements Client {
 	public Bookshelf createBookshelf(String name) throws ServiceException {
 		Response reply = target.path("/shelves").queryParam("name", name).request(MediaType.APPLICATION_JSON).post(null);
 		reply.bufferEntity();
-		if (reply.getStatus() != 201)
+		
+		System.out.println("CODICE ERRORE CREATE: " + reply.getStatus());
+		
+		if (reply.getStatus() != 200)
 			throw new ServiceException();
 		else {
 			MyBookshelfType res = reply.readEntity(MyBookshelfType.class);
