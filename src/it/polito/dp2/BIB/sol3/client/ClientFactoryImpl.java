@@ -10,14 +10,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import it.polito.dp2.BIB.sol3.model.MyBookshelf;
 import it.polito.dp2.BIB.sol3.service.jaxb.MyBookshelves;
-import it.polito.dp2.BIB.sol3.service.jaxb.*;
+import it.polito.dp2.BIB.sol3.service.jaxb.Items;
+import it.polito.dp2.BIB.sol3.service.jaxb.Item;
 import it.polito.dp2.BIB.ass3.Bookshelf;
 import it.polito.dp2.BIB.ass3.Client;
 import it.polito.dp2.BIB.ass3.DestroyedBookshelfException;
@@ -105,7 +105,7 @@ public class ClientFactoryImpl implements Client {
 			 	  .request(MediaType.APPLICATION_JSON_TYPE)
 			 	  .get( Items.class);
 		
-		for (it.polito.dp2.BIB.sol3.client.Items.Item i : items.getItem()) {
+		for (Item i : items.getItem()) {
 			itemSet.add(new ItemReaderImpl(i));
 		}
 		
