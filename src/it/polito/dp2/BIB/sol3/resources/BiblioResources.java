@@ -410,15 +410,15 @@ public class BiblioResources {
     		@ApiResponse(code = 404, message = "Not Found"),
     		})
 	public void deleteItemCitation(
-			@ApiParam("The name of the shelf") @QueryParam("name") String name) {
+			@ApiParam("The name of the shelf") @QueryParam("name") String name){
 		
 		if(name=="" || name.isEmpty() || name == null)
 			throw new BadRequestException();
 		
 		try {
 			service.deleteBookshelf(name);
-		} catch (DestroyedBookshelfException | ServiceException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			throw new InternalServerErrorException();
 		}
 	}
 	
@@ -472,10 +472,10 @@ public class BiblioResources {
 		
 			try {
 				return service.getBookshelfReads(id);
-			} catch (DestroyedBookshelfException | ServiceException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				throw new InternalServerErrorException();
 			}
-			return -1;
+
 	}
 	
 	@GET

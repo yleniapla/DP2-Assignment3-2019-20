@@ -162,7 +162,7 @@ public class BiblioService {
 		return b;		
 	}
 		
-	public synchronized MyBookshelves getBookshelves(String name) throws ServiceException {
+	public synchronized MyBookshelves getBookshelves(String name) throws Exception {
 		MyBookshelves list = new MyBookshelves();
 		System.out.println("Il numero totale di bookshelves è " + this.bs.values().size());
 		for(MyBookshelfType b : bs.values()){
@@ -204,27 +204,27 @@ public class BiblioService {
 			return 0;
 		}
 		else
-			throw new DestroyedBookshelfException();
+			throw new Exception();
 	}
 		
-	public synchronized boolean deleteBookshelf (String name) throws DestroyedBookshelfException, ServiceException {
+	public synchronized boolean deleteBookshelf (String name) throws Exception{
 		
 		if(bs.get(name)!=null){
 			bs.remove(name);
 			return true;
 		}
 		else
-			throw new DestroyedBookshelfException();
+			throw new Exception();
 	}
 	
-	public synchronized int getBookshelfReads (String id) throws DestroyedBookshelfException, ServiceException {
+	public synchronized int getBookshelfReads (String id) throws Exception, Exception {
 		
 		if(bs.get(id)!=null){
 			MyBookshelfType x = bs.get(id);
 			return x.getReads();
 		}
 		else
-			throw new DestroyedBookshelfException();
+			throw new Exception();
 		
 	}
 	
@@ -255,11 +255,11 @@ public class BiblioService {
 			x.getItem().removeAll(removed);
 			
 			if(flag == 0)
-				throw new UnknownItemException();
+				throw new Exception();
 
 		}
 		else
-			throw new DestroyedBookshelfException();
+			throw new Exception();
 		
 	}
 	
@@ -340,7 +340,7 @@ public class BiblioService {
 			return result;
 		}
 		else
-			throw new DestroyedBookshelfException();
+			throw new Exception();
 	}
 			
 	
